@@ -4,6 +4,11 @@ import { Server } from 'socket.io';
 import { randomBytes } from 'node:crypto';
 const app=express(),http=createServer(app),io=new Server(http);
 app.use(express.static('public'));
+app.get('/', (req, res) => {
+  res.sendFile('index.html', {
+    root: new URL('./public/', import.meta.url).pathname
+  });
+});
 const rooms=new Map(), nodes=['Gateway','DNS','Core Switch','Database','Wi-Fi','Firewall'];
 const snapshot=r=>({code:r.code,host:r.host,players:Object.entries(r.players).map(([id,p])=>({id,name:p.name,score:p.score,online:!!p.socketId})),phase:r.phase,health:r.health,time:r.time,incidents:r.incidents,log:r.log.slice(-5),result:r.result||null});
 function send(r){io.to(r.code).emit('state',snapshot(r))}
